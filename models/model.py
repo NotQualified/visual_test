@@ -21,11 +21,11 @@ class BaseNet(nn.Module):
                                     nn.PReLU(),
                                     nn.Linear(256, 10))
     
-    def forward(self, x):
+    def forward(self, x, keep_feature = False):
         feat = self.feat_ext(x)
         feat = feat.view(-1, self.NumInstances(feat))
-        return self.classifier(feat)
-
+        return self.classifier(feat) if not keep_feature else self.classifier(feat), feat
+    
     def NumInstances(self, t):
         ret = 1
         for ele in t.size()[1: ]:
