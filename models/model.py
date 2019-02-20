@@ -26,6 +26,9 @@ class BaseNet(nn.Module):
         feat = feat.view(-1, self.NumInstances(feat))
         return self.classifier(feat) if not keep_feature else self.classifier(feat), feat
     
+    def get_embeddings(self, x):
+        return self.feat_ext(x)
+
     def NumInstances(self, t):
         ret = 1
         for ele in t.size()[1: ]:
