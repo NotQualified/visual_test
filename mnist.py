@@ -24,13 +24,13 @@ test_loader = DataLoader(test_dataset, batch_size, False)
 
 if_load = False
 try:
-    net = torch.load('./model_save/mnist_model.ckpt')
+    net = torch.load('./model_save/mnist_adam_model.ckpt')
     if_load = True
 except BaseException:
     net = BaseNet()
     net = nn.DataParallel(net).cuda()
 criterion = nn.CrossEntropyLoss().cuda()
-optimizer = optim.SGD(net.parameters(), lr = 0.001, momentum = 0.9)
+optimizer = optim.Adam(net.parameters())
 
 if not if_load:
     for epoch in range(0, epochs):
@@ -39,7 +39,7 @@ if not if_load:
         for i, (data, label) in enumerate(train_loader):
             data, label = data.cuda(), label.cuda()
             optimizer.zero_grad() 
-            output = net(data)
+            output, _ = net(data)
             right += (torch.argmax(output, dim = 1) == label).sum().item()
             total += label.size()[0]
             loss = criterion(output, label)
@@ -52,9 +52,9 @@ if not if_load:
 right, total = 0, 0
 for i, (data, label) in enumerate(test_loader):
     data, label = data.cuda(), label.cuda()
-    output = net(data)
+    output, _ = net(data)
     right += (torch.argmax(output, dim = 1) == label).sum().item()
     total += label.size()[0]
     precision = right / total
 print("final precision: ", precision)
-
+torch.save(net, './model_save/mnist_adam_model.ckpt')
