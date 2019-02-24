@@ -23,7 +23,7 @@ test_dataset = MNIST('../data/MNIST', train = False, download = True,
 
 test_loader = DataLoader(test_dataset, batch_size, False)
 
-net = torch.load('./model_save/mnist_model.ckpt')
+net = torch.load('./model_save/mnist_adam_model.ckpt')
 
 feat = []
 labels = []
@@ -50,4 +50,4 @@ plt.subplot(111)
 plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c = labels, label = 'mnist')
 plt.legend()
 
-plt.savefig('images/mnist_tsne.png', dpi = 120)
+plt.savefig('images/mnist_adam_tsne.png', dpi = 120)

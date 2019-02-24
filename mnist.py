@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import basic.utils.utils as ut
 from torch.utils.data import DataLoader
 from models.model import BaseNet
 from torchvision.datasets import MNIST
@@ -9,6 +10,9 @@ from torchvision import transforms
 mean, std = 0.1307, 0.3081
 batch_size = 64
 epochs = 10
+
+gpu_ids = [1, 2, 3]
+ut.CudaDevices(gpu_ids)
 
 train_dataset = MNIST('../data/MNIST', train = True, download = True, 
                         transform = transforms.Compose([
@@ -23,11 +27,15 @@ train_loader = DataLoader(train_dataset, batch_size, True)
 test_loader = DataLoader(test_dataset, batch_size, False)
 
 if_load = False
+net = BaseNet()
 try:
-    net = torch.load('./model_save/mnist_adam_model.ckpt')
+    checkpoint = {}
+    basenet_state_dic = torch.load('./model_save/mnist_sd.pth')
+    basenet_state_dic = ut.ModifyStateDict(basenet_state_dic)
+    net.load_state_dict(basenet_state_dic)
     if_load = True
+    net = net.cuda()
 except BaseException:
-    net = BaseNet()
     net = nn.DataParallel(net).cuda()
 criterion = nn.CrossEntropyLoss().cuda()
 optimizer = optim.Adam(net.parameters())
@@ -57,4 +65,4 @@ for i, (data, label) in enumerate(test_loader):
     total += label.size()[0]
     precision = right / total
 print("final precision: ", precision)
-torch.save(net, './model_save/mnist_adam_model.ckpt')
+torch.save(net.state_dict(), "./model_save/mnist_sd.pth")
